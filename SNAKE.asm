@@ -1,0 +1,163 @@
+TITLE SNAKE GAME
+
+IF1
+INCLUDE ./MACROS/MACROS.asm
+INCLUDE ./MACROS/VIDEO.asm
+ENDIF
+
+.MODEL SMALL
+.STACK 100H
+.DATA
+    TABLERO DB 25 DUP(80 DUP(?))
+    
+;VARIABLES DEL MENU:
+    titulo DB "SNAKE$", "EQUIPO 6:$","LOS SEIS$"
+    tamsTitulo DB 5, 9, 8
+    nMsgsTitulo DB 3
+    
+    noms DB "CELIS CORRALES ANA PAOLA $", \
+        "VALDEZ GAMBOA JORGE ROBERTO $", \
+        "SANCHEZ RAMIREZ LUIS DANIEL $", \
+        "MEZA ESCOBAR CESAR EDUARDO $", \
+        "OLIVAS QUINONES GRECIA $", \
+        "VIZCAINO RODRIGUEZ ANGEL LEONARDO $"
+    tamsNoms DB 25, 28, 28, 27, 24, 35
+    
+    IDs DB "23170121$", "23170351$", "22170818$", "22170724$", "23170266$", "23170372$"
+    tamIDs DB 9
+    nIntegrantes DW 6
+    
+    msgPausa DB "PRESIONA UNA TECLA PARA INICIAR...$"
+    tamMsgPausa DB 34
+    
+    ;PASE DE PARAMETROS A PROCEDIMIENTOS DE MENSAJES:
+        msgsRenglonIn DB ?
+        msgsAct DW ? ;DIR.EFECTIVA
+        msgsTamsAct DW ? ;DIR.EFECTIVA
+        nMsgsAct DW ?
+        msgColorAct DB ?
+
+;VARIABLES DE TIEMPO:
+    CICLOS_MS DW 3000
+    ACT_ESPERA_MS DW 50
+    MIN_ESPERA_MS DW 35
+    DEC_ESPERA_MS DW 1; AUMENTAR VELOCIDAD
+     
+;VARIABLES DE VIDEO:    
+    OLD_MODEL       DB 0
+    OLD_COLOR       DB 0
+    OLD_PAGE        DB 0
+    INSIDE_COLOR    DB 00101111B
+    BORDER_COLOR    DB 01100111B
+    
+;VARIABLES DE POSICION ABSOLUTA:
+     Y_SCREEN DB 24
+     X_SCREEN DB 79
+     Y_LIM DB 23
+     X_LIM DB 77
+     
+;VARIABLES DEL JUEGO:
+    SNAKE       DW 500 DUP(?)
+    SNAKE_COL_INICIAL     DB 20
+    SNAKE_ROW_INICIAL     DB 10
+    SNAKE_HEAD_IX         DW 0
+    SNAKE_TAIL_IX         DW 0
+    SNAKE_LEN       DB 3
+    SNAKE_COLOR     DB 00000001B
+    SNAKE_MAX_LEN         DW 500
+    SNAKE_DIRECTION       DB 0
+    SNAKE_ERASE_POS       DW 0
+
+.CODE
+MAIN PROC
+    INIT_DS
+    
+; OBTENER MODO DE VIDEO ACTUAL
+    MOV AH,0FH
+    INT 10H
+    MOV OLD_MODEL, AL
+    MOV OLD_COLOR, AH
+    MOV OLD_PAGE, BH
+
+; CAMBIAR A NUEVO MODO DE VIDEO
+    MOV AH, 0
+    MOV AL, 3
+    
+    INT 10H
+    MOV AH, 1
+    MOV CH, 32
+    MOV CL, 0
+    INT 10H
+    
+    CALL DRAW_BG
+    CALL INIT_SNAKE
+    CALL GAME_LOOP
+    
+    END_PROGRAM 0
+    
+MAIN ENDP
+
+GAME_LOOP PROC
+.LOOP:
+    ; LEER TECLADO
+    MOV AH, 01H
+    INT 16H
+    JZ  .NO_KEY
+
+    MOV AH, 0
+    INT 16H
+    CMP AH, 48H             ; ARRIBA
+    JE .UP
+    
+    CMP AH, 4DH             ; DERECHA
+    JE .RIGHT
+    
+    CMP AH, 50H             ; ABAJO
+    JE .DOWN
+    
+    CMP AH, 4BH             ; IZQUIERDA
+    JE .LEFT
+    
+    JMP .NO_KEY
+.UP:
+    MOV SNAKE_DIRECTION, 0
+    JMP .NO_KEY
+.RIGHT:
+    MOV SNAKE_DIRECTION, 1
+    JMP .NO_KEY
+.DOWN:
+    MOV SNAKE_DIRECTION, 2
+    JMP .NO_KEY
+.LEFT:
+    MOV SNAKE_DIRECTION, 3
+.NO_KEY:
+    CALL MOVE_SNAKE
+    CALL DRAW_SNAKE
+
+    CALL DELAY
+    JMP .LOOP
+.FIN:
+    RET
+GAME_LOOP ENDP
+
+
+DELAY PROC
+    SAVE_REGS< CX >
+    MOV CX, ACT_ESPERA_MS
+    ESPERA:
+        SAVE_REGS< CX >
+        MOV CX, CICLOS_MS
+        DORMIR: 
+            NOP
+        LOOP DORMIR
+        RESTORE_REGS< CX >
+    LOOP ESPERA
+    RESTORE_REGS< CX >
+    RET
+DELAY ENDP
+
+INCLUDE ./PROCS/SNAKE.asm
+INCLUDE ./PROCS/SCREENS.asm
+
+END MAIN
+
