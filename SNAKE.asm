@@ -21,7 +21,7 @@ ENDIF
         "MEZA ESCOBAR CESAR EDUARDO $", \
         "OLIVAS QUINONES GRECIA $", \
         "VIZCAINO RODRIGUEZ ANGEL LEONARDO $"
-    tamsNoms DB 25, 28, 28, 27, 24, 35
+    tamsNoms DB 25, 28, 28, 27, 23, 35
     
     IDs DB "23170121$", "23170351$", "22170818$", "22170724$", "23170266$", "23170372$"
     tamIDs DB 9
