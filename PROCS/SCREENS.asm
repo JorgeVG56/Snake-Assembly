@@ -29,6 +29,19 @@ DRAW_BG PROC
     
 DRAW_BG ENDP
 
+IMPRIMIR_GAMEOVER PROC
+    SAVE_REGS< DX >
+    CALCULAR_CENTRO Y_SCREEN, 1, msgsRenglonIn
+    LEA DX, msgFin
+    MOV msgsAct, DX
+    LEA DX, tamMsgFin
+    MOV msgsTamsAct, DX
+    MOV nMsgsAct, 1
+    CALL IMPRIMIR_TEXTO_CENTRADO
+    RESTORE_REGS< DX >
+    RET
+ENDP
+
 IMPRIMIR_MENU PROC
     
     SAVE_REGS< DX >

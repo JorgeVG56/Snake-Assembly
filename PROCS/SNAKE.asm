@@ -114,11 +114,11 @@ MOVE_SNAKE PROC
     ;DECTAR ERRORES POR LOS BORDES
     CMP AH, 1       
     JL .CHOQUE
-    CMP AH, 23       
+    CMP AH, Y_LIM       
     JG .CHOQUE
     CMP AL, 2       
     JL .CHOQUE
-    CMP AL, 77       
+    CMP AL, X_LIM       
     JG .CHOQUE
     
     ; INSERTAR NUEVA CABEZA
@@ -154,16 +154,7 @@ MOVE_SNAKE PROC
     
 ;ACCION CHOCAR
 .CHOQUE:
-    MOV AH, 02H
-    MOV BH, 0
-    MOV DH, 12       
-    MOV DL, 30       
-    INT 10H
-
-    MOV AH, 09H
-    LEA DX, MSJ_FIN
-    INT 21H
-
-    MOV AH, 4CH
-    INT 21H
+    CALL IMPRIMIR_GAMEOVER
+    END_PROGRAM 0
+    
 MOVE_SNAKE ENDP
