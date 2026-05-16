@@ -85,6 +85,15 @@ ENDIF
     TEMP_Y          DB 0           
     APPLE_COLOR     DB 4H        
 
+;VARIABLES DEL HIGHSCORE (PERSISTENCIA):
+    filename        DB "snakehs.dat", 0
+    file_handle     DW ?
+    file_buffer     DW 0
+    highscore       DW 0
+    score           DW 0                ; Puntos de la partida actual
+    lblScore        DB "SCORE: $"
+    lblHigh         DB "HI-SCORE: $"
+    numBuffer       DB 6 DUP('$')       ; Búfer para conversión ASCII
 
 .CODE
 MAIN PROC
@@ -114,8 +123,9 @@ MAIN PROC
     CALL PAUSE_LOOP
     CALL DRAW_BG
     CALL INIT_SNAKE
+    CALL LOAD_HIGHSCORE
     ; GENERA LAS 10 MANZANAS AL INICIO
-     CALL GENERAR_MANZANAS   
+    CALL GENERAR_MANZANAS   
     CALL GAME_LOOP         
     
     END_PROGRAM 0
@@ -182,6 +192,7 @@ GAME_LOOP PROC
     CALL DRAW_SNAKE
     ; REDIBUJAR MANZANAS CADA FRAME
     CALL DIBUJAR_MANZANAS           
+    CALL DIBUJAR_MARCADOR   
     CALL DELAY
     JMP .LOOP
 .FIN:
@@ -206,5 +217,6 @@ DELAY ENDP
 INCLUDE ./PROCS/SNAKE.asm
 INCLUDE ./PROCS/SCREENS.asm
 INCLUDE ./PROCS/MANZANAS.asm
+INCLUDE ./PROCS/SCORE.asm
 
 END MAIN

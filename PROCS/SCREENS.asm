@@ -162,3 +162,79 @@ IMPRIMIR_TEXTO_CENTRADO PROC
     RET
     
 IMPRIMIR_TEXTO_CENTRADO ENDP
+
+DIBUJAR_MARCADOR PROC
+    SAVE_REGS <AX, BX, CX, DX>
+
+    ; --- 1. IMPRIMIR SCORE ACTUAL (Arriba a la izquierda: Fila 0, Columna 2) ---
+    MOV AH, 02H
+    MOV BH, 0
+    MOV DH, 0               ; Fila 0
+    MOV DL, 2               ; Columna 2
+    INT 10H
+
+    MOV AH, 09H
+    LEA DX, lblScore
+    INT 21H
+
+    MOV AX, score
+    CALL CONVERTIR_A_ASCII
+    MOV DX, AX              ; Dirección de la cadena devuelta por la subrutina
+    MOV AH, 09H
+    INT 21H
+
+    ; --- 2. IMPRIMIR HIGHSCORE (Arriba a la derecha: Fila 0, Columna 62) ---
+    MOV AH, 02H
+    MOV BH, 0
+    MOV DH, 0               ; Fila 0
+    MOV DL, 62              ; Columna 62
+    INT 10H
+
+    MOV AH, 09H
+    LEA DX, lblHigh
+    INT 21H
+
+    MOV AX, highscore
+    CALL CONVERTIR_A_ASCII
+    MOV DX, AX
+    MOV AH, 09H
+    INT 21H
+
+    RESTORE_REGS <DX, CX, BX, AX>
+    RET
+DIBUJAR_MARCADOR ENDP
+
+
+; ========================================================
+; SUBRUTINA AUXILIAR: CONVERTIR_A_ASCII
+; Recibe: AX = Valor numérico a convertir
+; Devuelve: AX = Puntero al inicio de la cadena en numBuffer
+; ========================================================
+CONVERTIR_A_ASCII PROC
+    PUSH BX
+    PUSH CX
+    PUSH DX
+    PUSH SI
+
+    LEA SI, numBuffer
+    ADD SI, 5
+    MOV BYTE PTR [SI], '$'  ; Fin de cadena para la INT 21h
+    MOV CX, 10              ; Divisor base 10
+
+.CICLO_DIV:
+    DEC SI
+    XOR DX, DX              ; Limpiar residuo
+    DIV CX                  ; AX = Cociente, DX = Residuo (el dígito)
+    ADD DL, '0'             ; Convertir a carácter ASCII
+    MOV [SI], DL            ; Guardar en el búfer
+    OR AX, AX               ; ¿El cociente es 0?
+    JNZ .CICLO_DIV          ; Si no, seguir dividiendo
+
+    MOV AX, SI              ; Retornar la posición exacta donde empieza el número
+
+    POP SI
+    POP DX
+    POP CX
+    POP BX
+    RET
+CONVERTIR_A_ASCII ENDP

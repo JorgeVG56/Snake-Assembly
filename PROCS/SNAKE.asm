@@ -155,6 +155,12 @@ MOVE_SNAKE PROC
     
 ;ACCION CHOCAR
 .CHOQUE:
+    MOV AX,score     ; Asegúrate de usar la variable que acumula tus puntos
+    CMP AX, highscore
+    JBE .MOSTRAR_FIN 
+    MOV highscore, AX
+    CALL SAVE_HIGHSCORE
+.MOSTRAR_FIN:
     CALL IMPRIMIR_GAMEOVER
     END_PROGRAM 0
     

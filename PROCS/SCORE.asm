@@ -1,0 +1,69 @@
+LOAD_HIGHSCORE PROC
+    SAVE_REGS<AX,BX,CX,DX>
+
+    ; INTENTAR ABRIR EL ARCHIVO (MODO LECTURA)
+    MOV AH, 3DH
+    LEA DX, filename
+    MOV AL, 0
+    INT 21H
+    JC FILE_NOT_FOUND ; SI EL CARRY FLAG SE ACTIVA, EL ARCHIVO NO EXISTE
+
+    MOV file_handle, AX
+
+    ; LEER 2 BYTES
+    MOV AH, 3FH
+    MOV BX, file_handle
+    MOV CX, 2
+    LEA DX, file_buffer
+    INT 21H
+
+    ; CERRAR ARCHIVO
+    MOV AH, 3EH
+    MOV BX, file_handle
+    INT 21H
+    
+    ; ASIGNAR VALOR RECUPERADO A RECORDACT
+    MOV AX, file_buffer
+    MOV highscore, AX
+    JMP EXIT_LOAD
+FILE_NOT_FOUND:
+    MOV highscore, 0
+EXIT_LOAD:
+    RESTORE_REGS<DX,CX,BX,AX>
+    RET
+LOAD_HIGHSCORE ENDP
+
+SAVE_HIGHSCORE PROC
+
+    SAVE_REGS< AX, BX, CX, DX >
+
+    ; CREAR O SOBREESCRIBIR EL ARCHIVO
+    MOV AH, 3CH
+    LEA DX, filename
+    MOV CX, 0             ; ATRIBUTOS NORMALES
+    INT 21H
+    JC EXIT_SAVE          ; SI HAY ERROR AL CREAR, SALIR
+
+    MOV file_handle, AX
+
+    ; COPIAR EL HIGHSCORE AL BUFFER DE ARCHIVO
+    MOV AX, highscore
+    MOV file_buffer, AX
+
+    ; ESCRIBIR 2 BYTES EN EL ARCHIVO
+    MOV AH, 40H
+    MOV BX, file_handle
+    MOV CX, 2
+    LEA DX, file_buffer
+    INT 21H
+
+    ; CERRAR ARCHIVO
+    MOV AH, 3EH
+    MOV BX, file_handle
+    INT 21H
+
+EXIT_SAVE:
+    RESTORE_REGS< DX, CX, BX, AX >
+    RET
+
+SAVE_HIGHSCORE ENDP
